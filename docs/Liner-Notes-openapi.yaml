@@ -1,0 +1,1127 @@
+openapi: 3.0.3
+info:
+  title: Liner Notes API
+  version: 1.0.0
+  description: >
+    API for the **Liner Notes** application, a vinyl collection and wishlist manager.
+
+    - The client **never accesses the database directly**.
+    - All access flows through this API.
+    - Auth is handled via JWT (e.g., Supabase Auth); each request is associated with an `auth_user_id`.
+    - User-owned resources (profiles, collections, wishlists) are always scoped to the
+      authenticated user on the server side.
+
+servers:
+  - url: https://api.liner-notes.example.com/v1
+    description: Production server
+  - url: http://localhost:3000/v1
+    description: Local development server
+
+tags:
+  - name: Auth & Profile
+    description: Current user and profile operations
+  - name: Labels
+  - name: Artists
+  - name: Albums
+  - name: Collections
+  - name: Collection Albums
+  - name: Wishlists
+  - name: Wishlist Albums
+
+security:
+  - bearerAuth: []
+
+paths:
+  /me/profile:
+    get:
+      tags: [Auth & Profile]
+      summary: Get current user's profile
+      description: >
+        Returns the profile linked to the authenticated user's `auth_user_id`
+        based on the `profiles` table and `auth.users`.
+      responses:
+        '200':
+          description: Current profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '401':
+          description: Unauthorized
+    patch:
+      tags: [Auth & Profile]
+      summary: Update current user's profile
+      description: >
+        Partially update the authenticated user's profile. Only `display_name`
+        is writable via this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name:
+                  type: string
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+
+  /labels:
+    get:
+      tags: [Labels]
+      summary: List labels
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Filter by name substring
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of labels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Label'
+    post:
+      tags: [Labels]
+      summary: Create label
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabelCreate'
+      responses:
+        '201':
+          description: Created label
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        '400':
+          description: Validation error
+
+  /labels/{label_id}:
+    parameters:
+      - in: path
+        required: true
+        name: label_id
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Labels]
+      summary: Get label by ID
+      responses:
+        '200':
+          description: Label
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        '404':
+          description: Not found
+    patch:
+      tags: [Labels]
+      summary: Update label
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabelUpdate'
+      responses:
+        '200':
+          description: Updated label
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        '404':
+          description: Not found
+    delete:
+      tags: [Labels]
+      summary: Delete label
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /artists:
+    get:
+      tags: [Artists]
+      summary: List artists
+      parameters:
+        - in: query
+          name: genre
+          schema:
+            type: string
+          description: Filter by genre
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Filter by artist name substring
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of artists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Artist'
+    post:
+      tags: [Artists]
+      summary: Create artist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArtistCreate'
+      responses:
+        '201':
+          description: Created artist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artist'
+
+  /artists/{artist_id}:
+    parameters:
+      - in: path
+        name: artist_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Artists]
+      summary: Get artist by ID
+      responses:
+        '200':
+          description: Artist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artist'
+        '404':
+          description: Not found
+    patch:
+      tags: [Artists]
+      summary: Update artist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArtistUpdate'
+      responses:
+        '200':
+          description: Updated artist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artist'
+    delete:
+      tags: [Artists]
+      summary: Delete artist
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /albums:
+    get:
+      tags: [Albums]
+      summary: List albums
+      parameters:
+        - in: query
+          name: genre
+          schema:
+            type: string
+        - in: query
+          name: label_id
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: artist_id
+          schema:
+            type: string
+            format: uuid
+          description: Filter albums that feature this artist
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Filter by title substring
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of albums
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Album'
+    post:
+      tags: [Albums]
+      summary: Create album
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlbumCreate'
+      responses:
+        '201':
+          description: Created album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Album'
+
+  /albums/{album_id}:
+    parameters:
+      - in: path
+        name: album_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Albums]
+      summary: Get album by ID
+      responses:
+        '200':
+          description: Album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Album'
+        '404':
+          description: Not found
+    patch:
+      tags: [Albums]
+      summary: Update album
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlbumUpdate'
+      responses:
+        '200':
+          description: Updated album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Album'
+        '404':
+          description: Not found
+    delete:
+      tags: [Albums]
+      summary: Delete album
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /albums/{album_id}/artists:
+    parameters:
+      - in: path
+        name: album_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Albums]
+      summary: List artists on an album
+      responses:
+        '200':
+          description: Artists on album
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Artist'
+    put:
+      tags: [Albums]
+      summary: Replace album's artists
+      description: >
+        Replace the set of artists for this album. Internally operates on the
+        `album_artists` join table.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                artist_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+      responses:
+        '200':
+          description: Updated list of artists for the album
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Artist'
+
+  /collections:
+    get:
+      tags: [Collections]
+      summary: List current user's collections
+      responses:
+        '200':
+          description: Collections owned by current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Collection'
+    post:
+      tags: [Collections]
+      summary: Create collection for current user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionCreate'
+      responses:
+        '201':
+          description: Created collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+
+  /collections/{collection_id}:
+    parameters:
+      - in: path
+        name: collection_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Collections]
+      summary: Get a single collection (must belong to current user)
+      responses:
+        '200':
+          description: Collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+        '403':
+          description: Forbidden (not owned by user)
+        '404':
+          description: Not found
+    patch:
+      tags: [Collections]
+      summary: Update collection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionUpdate'
+      responses:
+        '200':
+          description: Updated collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      tags: [Collections]
+      summary: Delete collection
+      description: >
+        Deletes the collection and cascades to `collection_albums` via
+        `ON DELETE CASCADE`.
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+
+  /collections/{collection_id}/albums:
+    parameters:
+      - in: path
+        name: collection_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Collection Albums]
+      summary: List albums in a collection
+      responses:
+        '200':
+          description: Albums in collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollectionAlbumExpanded'
+        '403':
+          description: Forbidden
+        '404':
+          description: Collection not found
+    post:
+      tags: [Collection Albums]
+      summary: Add album to collection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionAlbumCreate'
+      responses:
+        '201':
+          description: Added album to collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionAlbum'
+        '409':
+          description: Album already in collection
+
+  /collections/{collection_id}/albums/{album_id}:
+    parameters:
+      - in: path
+        name: collection_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: album_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Collection Albums]
+      summary: Update album metadata in collection
+      description: Update condition or notes for a specific album in a collection.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                condition:
+                  $ref: '#/components/schemas/CollectionCondition'
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Updated collection album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionAlbum'
+        '404':
+          description: Not found
+    delete:
+      tags: [Collection Albums]
+      summary: Remove album from collection
+      responses:
+        '204':
+          description: Removed
+        '404':
+          description: Not found
+
+  /wishlists:
+    get:
+      tags: [Wishlists]
+      summary: List current user's wishlists
+      responses:
+        '200':
+          description: Wishlists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wishlist'
+    post:
+      tags: [Wishlists]
+      summary: Create wishlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WishlistCreate'
+      responses:
+        '201':
+          description: Created wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wishlist'
+
+  /wishlists/{wishlist_id}:
+    parameters:
+      - in: path
+        name: wishlist_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Wishlists]
+      summary: Get wishlist
+      responses:
+        '200':
+          description: Wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wishlist'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    patch:
+      tags: [Wishlists]
+      summary: Update wishlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WishlistUpdate'
+      responses:
+        '200':
+          description: Updated wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wishlist'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      tags: [Wishlists]
+      summary: Delete wishlist
+      description: Cascades to `wishlist_albums`.
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+
+  /wishlists/{wishlist_id}/albums:
+    parameters:
+      - in: path
+        name: wishlist_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Wishlist Albums]
+      summary: List albums on a wishlist
+      responses:
+        '200':
+          description: Albums with wishlist metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WishlistAlbumExpanded'
+        '403':
+          description: Forbidden
+        '404':
+          description: Wishlist not found
+    post:
+      tags: [Wishlist Albums]
+      summary: Add album to wishlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WishlistAlbumCreate'
+      responses:
+        '201':
+          description: Added wishlist album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistAlbum'
+        '409':
+          description: Album already on wishlist
+
+  /wishlists/{wishlist_id}/albums/{album_id}:
+    parameters:
+      - in: path
+        name: wishlist_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: album_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Wishlist Albums]
+      summary: Update wishlist entry
+      description: Update priority or acquired status for an album on a wishlist.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                priority:
+                  type: integer
+                acquired:
+                  type: boolean
+      responses:
+        '200':
+          description: Updated wishlist album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistAlbum'
+        '404':
+          description: Not found
+    delete:
+      tags: [Wishlist Albums]
+      summary: Remove album from wishlist
+      responses:
+        '204':
+          description: Removed
+        '404':
+          description: Not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        auth_user_id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+          nullable: true
+        join_date:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    Label:
+      type: object
+      properties:
+        label_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        country:
+          type: string
+          nullable: true
+        discogs_id:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required: [label_id, name]
+
+    LabelCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        country:
+          type: string
+        discogs_id:
+          type: integer
+      required: [name]
+
+    LabelUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        country:
+          type: string
+        discogs_id:
+          type: integer
+
+    Artist:
+      type: object
+      properties:
+        artist_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        discogs_id:
+          type: integer
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        genre:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required: [artist_id, name]
+
+    ArtistCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        discogs_id:
+          type: integer
+        country:
+          type: string
+        genre:
+          type: string
+      required: [name]
+
+    ArtistUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        discogs_id:
+          type: integer
+        country:
+          type: string
+        genre:
+          type: string
+
+    Album:
+      type: object
+      properties:
+        album_id:
+          type: string
+          format: uuid
+        label_id:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+        release_year:
+          type: integer
+          nullable: true
+        discogs_id:
+          type: integer
+          nullable: true
+        cover_image_url:
+          type: string
+          nullable: true
+        genre:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required: [album_id, title]
+
+    AlbumCreate:
+      type: object
+      properties:
+        label_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        release_year:
+          type: integer
+        discogs_id:
+          type: integer
+        cover_image_url:
+          type: string
+        genre:
+          type: string
+      required: [title]
+
+    AlbumUpdate:
+      type: object
+      properties:
+        label_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        release_year:
+          type: integer
+        discogs_id:
+          type: integer
+        cover_image_url:
+          type: string
+        genre:
+          type: string
+
+    Collection:
+      type: object
+      properties:
+        collection_id:
+          type: string
+          format: uuid
+        user_profile_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required: [collection_id, user_profile_id, name]
+
+    CollectionCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+      required: [name]
+
+    CollectionUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    CollectionCondition:
+      type: string
+      enum: [New, Excellent, Good, Fair, Poor]
+
+    CollectionAlbum:
+      type: object
+      properties:
+        collection_album_id:
+          type: string
+          format: uuid
+        collection_id:
+          type: string
+          format: uuid
+        album_id:
+          type: string
+          format: uuid
+        condition:
+          $ref: '#/components/schemas/CollectionCondition'
+        notes:
+          type: string
+          nullable: true
+        date_added:
+          type: string
+          format: date-time
+      required: [collection_album_id, collection_id, album_id, condition]
+
+    CollectionAlbumCreate:
+      type: object
+      properties:
+        album_id:
+          type: string
+          format: uuid
+        condition:
+          $ref: '#/components/schemas/CollectionCondition'
+        notes:
+          type: string
+      required: [album_id]
+
+    CollectionAlbumExpanded:
+      allOf:
+        - $ref: '#/components/schemas/CollectionAlbum'
+        - type: object
+          properties:
+            album:
+              $ref: '#/components/schemas/Album'
+            artists:
+              type: array
+              items:
+                $ref: '#/components/schemas/Artist'
+
+    Wishlist:
+      type: object
+      properties:
+        wishlist_id:
+          type: string
+          format: uuid
+        user_profile_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required: [wishlist_id, user_profile_id, name]
+
+    WishlistCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+      required: [name]
+
+    WishlistUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    WishlistAlbum:
+      type: object
+      properties:
+        wishlist_album_id:
+          type: string
+          format: uuid
+        wishlist_id:
+          type: string
+          format: uuid
+        album_id:
+          type: string
+          format: uuid
+        priority:
+          type: integer
+          nullable: true
+        acquired:
+          type: boolean
+        date_added:
+          type: string
+          format: date-time
+      required: [wishlist_album_id, wishlist_id, album_id]
+
+    WishlistAlbumCreate:
+      type: object
+      properties:
+        album_id:
+          type: string
+          format: uuid
+        priority:
+          type: integer
+      required: [album_id]
+
+    WishlistAlbumExpanded:
+      allOf:
+        - $ref: '#/components/schemas/WishlistAlbum'
+        - type: object
+          properties:
+            album:
+              $ref: '#/components/schemas/Album'
+            artists:
+              type: array
+              items:
+                $ref: '#/components/schemas/Artist'
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
