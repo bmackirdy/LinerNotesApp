@@ -21,11 +21,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/wishlist/page.js"
     ],
-    "/artists/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/artists/page.js"
-    ],
     "/labels/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -35,6 +30,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/profile/page.js"
+    ],
+    "/search/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/search/page.js"
     ]
   }
 }

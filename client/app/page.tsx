@@ -24,11 +24,11 @@ export default function Home() {
         </Link>
         
         <Link 
-          href="/artists" 
+          href="/search" 
           className="p-6 border rounded-lg hover:bg-gray-50 transition-colors"
         >
-          <h2 className="text-2xl font-semibold mb-2">Artists</h2>
-          <p>Browse by artist</p>
+          <h2 className="text-2xl font-semibold mb-2">Search</h2>
+          <p>Search albums, artists, and labels</p>
         </Link>
         
         <Link 
