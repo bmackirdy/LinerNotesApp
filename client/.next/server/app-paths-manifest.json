@@ -1,6 +1,8 @@
 {
-  "/page": "app/page.js",
-  "/search/page": "app/search/page.js",
   "/profile/page": "app/profile/page.js",
-  "/collection/page": "app/collection/page.js"
+  "/wishlist/page": "app/wishlist/page.js",
+  "/page": "app/page.js",
+  "/labels/page": "app/labels/page.js",
+  "/collection/page": "app/collection/page.js",
+  "/search/page": "app/search/page.js"
 }
