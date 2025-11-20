@@ -1,8 +1,8 @@
 {
-  "/collection/page": "app/collection/page.js",
-  "/wishlist/page": "app/wishlist/page.js",
+  "/page": "app/page.js",
   "/artists/page": "app/artists/page.js",
   "/labels/page": "app/labels/page.js",
-  "/page": "app/page.js",
+  "/collection/page": "app/collection/page.js",
+  "/wishlist/page": "app/wishlist/page.js",
   "/profile/page": "app/profile/page.js"
 }
