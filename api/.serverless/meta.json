@@ -1,0 +1,1089 @@
+{
+  "/Users/benmackirdy/CascadeProjects/Liner Notes/api/serverless.yml": {
+    "versionFramework": "4.25.0",
+    "servicePath": "/Users/benmackirdy/CascadeProjects/Liner Notes/api/serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "liner-notes-api",
+      "frameworkVersion": "4",
+      "provider": {
+        "name": "aws",
+        "runtime": "nodejs20.x",
+        "region": "us-east-1",
+        "stage": "dev",
+        "memorySize": 512,
+        "timeout": 30,
+        "httpApi": {
+          "cors": {
+            "allowedOrigins": [
+              "*"
+            ],
+            "allowedHeaders": [
+              "*"
+            ],
+            "allowedMethods": [
+              "*"
+            ]
+          }
+        },
+        "environment": {
+          "NODE_ENV": "production",
+          "SECRETS_ID": "<REDACTED>",
+          "SUPABASE_URL": "https://zceqlyijatqngsbgxcip.supabase.co",
+          "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjZXFseWlqYXRxbmdzYmd4Y2lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjM2MjIsImV4cCI6MjA3ODAzOTYyMn0.B5E041A0ieyEhPN7gMOPkMH_NOm9BtLhpUiTB85ijBE",
+          "SUPABASE_SERVICE_KEY": "your-service-key-here"
+        },
+        "iam": {
+          "role": {
+            "statements": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "secretsmanager:GetSecretValue"
+                ],
+                "Resource": [
+                  "*"
+                ]
+              }
+            ]
+          }
+        },
+        "versionFunctions": true,
+        "compiledCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "ApiLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/liner-notes-api-dev-api"
+              }
+            },
+            "IamRoleLambdaExecution": {
+              "Type": "AWS::IAM::Role",
+              "Properties": {
+                "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": [
+                          "lambda.amazonaws.com"
+                        ]
+                      },
+                      "Action": [
+                        "sts:AssumeRole"
+                      ]
+                    }
+                  ]
+                },
+                "Policies": [
+                  {
+                    "PolicyName": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          "liner-notes-api",
+                          "dev",
+                          "lambda"
+                        ]
+                      ]
+                    },
+                    "PolicyDocument": {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogStream",
+                            "logs:CreateLogGroup",
+                            "logs:TagResource"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/liner-notes-api-dev*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/liner-notes-api-dev*:*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "secretsmanager:GetSecretValue"
+                          ],
+                          "Resource": [
+                            "*"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "Path": "/",
+                "RoleName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "liner-notes-api",
+                      "dev",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "lambdaRole"
+                    ]
+                  ]
+                }
+              }
+            },
+            "ApiLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-705ce3db-0a9e",
+                  "S3Key": "serverless/liner-notes-api/dev/1763769488116-2025-11-21T23:58:08.116Z/liner-notes-api.zip"
+                },
+                "Handler": "lambda.handler",
+                "Runtime": "nodejs20.x",
+                "FunctionName": "liner-notes-api-dev-api",
+                "MemorySize": 512,
+                "Timeout": 30,
+                "Environment": {
+                  "Variables": {
+                    "NODE_ENV": "production",
+                    "SECRETS_ID": "<REDACTED>",
+                    "SUPABASE_URL": "https://zceqlyijatqngsbgxcip.supabase.co",
+                    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjZXFseWlqYXRxbmdzYmd4Y2lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjM2MjIsImV4cCI6MjA3ODAzOTYyMn0.B5E041A0ieyEhPN7gMOPkMH_NOm9BtLhpUiTB85ijBE",
+                    "SUPABASE_SERVICE_KEY": "your-service-key-here"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "ApiLogGroup"
+              ]
+            },
+            "ApiLambdaVersionD61X938tcr77Y9bfahZO0YnqPQ3dczc49v3nDZpfOw": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "ApiLambdaFunction"
+                },
+                "CodeSha256": "KR1rM9To6s0q2zOlFTT5Ye5kupk70gg9B6u5H4YF7no="
+              }
+            },
+            "HttpApi": {
+              "Type": "AWS::ApiGatewayV2::Api",
+              "Properties": {
+                "Name": "dev-liner-notes-api",
+                "ProtocolType": "HTTP",
+                "CorsConfiguration": {
+                  "AllowCredentials": "<REDACTED>",
+                  "AllowHeaders": [
+                    "*"
+                  ],
+                  "AllowMethods": [
+                    "*"
+                  ],
+                  "AllowOrigins": [
+                    "*"
+                  ]
+                }
+              }
+            },
+            "HttpApiStage": {
+              "Type": "AWS::ApiGatewayV2::Stage",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "StageName": "$default",
+                "AutoDeploy": true,
+                "DefaultRouteSettings": {
+                  "DetailedMetricsEnabled": false
+                }
+              }
+            },
+            "ApiLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "ApiLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationApi": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "ApiLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRouteAnyProxyVar": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "ANY /{proxy+}",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationApi"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationApi"
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": "serverless-framework-deployments-us-east-1-705ce3db-0a9e",
+              "Export": {
+                "Name": "sls-liner-notes-api-dev-ServerlessDeploymentBucketName"
+              }
+            },
+            "ApiLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "ApiLambdaVersionD61X938tcr77Y9bfahZO0YnqPQ3dczc49v3nDZpfOw"
+              },
+              "Export": {
+                "Name": "sls-liner-notes-api-dev-ApiLambdaFunctionQualifiedArn"
+              }
+            },
+            "HttpApiId": {
+              "Description": "Id of the HTTP API",
+              "Value": {
+                "Ref": "HttpApi"
+              },
+              "Export": {
+                "Name": "sls-liner-notes-api-dev-HttpApiId"
+              }
+            },
+            "HttpApiUrl": {
+              "Description": "URL of the HTTP API",
+              "Value": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "https://",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    ".execute-api.",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ".",
+                    {
+                      "Ref": "AWS::URLSuffix"
+                    }
+                  ]
+                ]
+              },
+              "Export": {
+                "Name": "sls-liner-notes-api-dev-HttpApiUrl"
+              }
+            }
+          }
+        },
+        "vpc": {}
+      },
+      "functions": {
+        "api": {
+          "handler": "lambda.handler",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/{proxy+}",
+                "method": "ANY"
+              },
+              "resolvedMethod": "ANY",
+              "resolvedPath": "/{proxy+}"
+            }
+          ],
+          "name": "liner-notes-api-dev-api",
+          "package": {},
+          "memory": 512,
+          "timeout": 30,
+          "runtime": "nodejs20.x",
+          "vpc": {},
+          "versionLogicalId": "ApiLambdaVersionD61X938tcr77Y9bfahZO0YnqPQ3dczc49v3nDZpfOw"
+        }
+      },
+      "plugins": [
+        "serverless-offline"
+      ],
+      "custom": {
+        "serverless-offline": {
+          "httpPort": 3001,
+          "lambdaPort": 3002
+        }
+      },
+      "package": {
+        "patterns": [
+          "node_modules/**",
+          "lambda.js",
+          "package.json",
+          "package-lock.json"
+        ],
+        "artifactsS3KeyDirname": "serverless/liner-notes-api/dev/code-artifacts",
+        "deploymentBucket": "serverless-framework-deployments-us-east-1-705ce3db-0a9e",
+        "artifact": "/Users/benmackirdy/CascadeProjects/Liner Notes/api/.serverless/liner-notes-api.zip",
+        "artifactDirectoryName": "serverless/liner-notes-api/dev/1763769488116-2025-11-21T23:58:08.116Z"
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs20.x",
+      "region": "us-east-1",
+      "stage": "dev",
+      "memorySize": 512,
+      "timeout": 30,
+      "httpApi": {
+        "cors": {
+          "allowedOrigins": [
+            "*"
+          ],
+          "allowedHeaders": [
+            "*"
+          ],
+          "allowedMethods": [
+            "*"
+          ]
+        }
+      },
+      "environment": {
+        "NODE_ENV": "production",
+        "SECRETS_ID": "<REDACTED>",
+        "SUPABASE_URL": "https://zceqlyijatqngsbgxcip.supabase.co",
+        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjZXFseWlqYXRxbmdzYmd4Y2lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjM2MjIsImV4cCI6MjA3ODAzOTYyMn0.B5E041A0ieyEhPN7gMOPkMH_NOm9BtLhpUiTB85ijBE",
+        "SUPABASE_SERVICE_KEY": "your-service-key-here"
+      },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "secretsmanager:GetSecretValue"
+              ],
+              "Resource": [
+                "*"
+              ]
+            }
+          ]
+        }
+      },
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ApiLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/liner-notes-api-dev-api"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "liner-notes-api",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/liner-notes-api-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/liner-notes-api-dev*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "secretsmanager:GetSecretValue"
+                        ],
+                        "Resource": [
+                          "*"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "liner-notes-api",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "ApiLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-705ce3db-0a9e",
+                "S3Key": "serverless/liner-notes-api/dev/1763769488116-2025-11-21T23:58:08.116Z/liner-notes-api.zip"
+              },
+              "Handler": "lambda.handler",
+              "Runtime": "nodejs20.x",
+              "FunctionName": "liner-notes-api-dev-api",
+              "MemorySize": 512,
+              "Timeout": 30,
+              "Environment": {
+                "Variables": {
+                  "NODE_ENV": "production",
+                  "SECRETS_ID": "<REDACTED>",
+                  "SUPABASE_URL": "https://zceqlyijatqngsbgxcip.supabase.co",
+                  "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjZXFseWlqYXRxbmdzYmd4Y2lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjM2MjIsImV4cCI6MjA3ODAzOTYyMn0.B5E041A0ieyEhPN7gMOPkMH_NOm9BtLhpUiTB85ijBE",
+                  "SUPABASE_SERVICE_KEY": "your-service-key-here"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ApiLogGroup"
+            ]
+          },
+          "ApiLambdaVersionD61X938tcr77Y9bfahZO0YnqPQ3dczc49v3nDZpfOw": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ApiLambdaFunction"
+              },
+              "CodeSha256": "KR1rM9To6s0q2zOlFTT5Ye5kupk70gg9B6u5H4YF7no="
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-liner-notes-api",
+              "ProtocolType": "HTTP",
+              "CorsConfiguration": {
+                "AllowCredentials": "<REDACTED>",
+                "AllowHeaders": [
+                  "*"
+                ],
+                "AllowMethods": [
+                  "*"
+                ],
+                "AllowOrigins": [
+                  "*"
+                ]
+              }
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              }
+            }
+          },
+          "ApiLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ApiLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationApi": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "ApiLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteAnyProxyVar": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "ANY /{proxy+}",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationApi"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationApi"
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-705ce3db-0a9e",
+            "Export": {
+              "Name": "sls-liner-notes-api-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "ApiLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ApiLambdaVersionD61X938tcr77Y9bfahZO0YnqPQ3dczc49v3nDZpfOw"
+            },
+            "Export": {
+              "Name": "sls-liner-notes-api-dev-ApiLambdaFunctionQualifiedArn"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-liner-notes-api-dev-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-liner-notes-api-dev-HttpApiUrl"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "serviceRawFile": "service: liner-notes-api\n\nframeworkVersion: '4'\n\nprovider:\n  name: aws\n  runtime: nodejs20.x\n  region: us-east-1\n  stage: dev\n  memorySize: 512\n  timeout: 30\n  httpApi:\n    cors:\n      allowedOrigins:\n        - \"*\"\n      allowedHeaders:\n        - \"*\"\n      allowedMethods:\n        - \"*\"\n  environment:\n    NODE_ENV: production\n    SECRETS_ID: ${env:SECRETS_ID, 'liner-notes-api-secrets'}\n    SUPABASE_URL: ${env:SUPABASE_URL, 'https://zceqlyijatqngsbgxcip.supabase.co'}\n    SUPABASE_ANON_KEY: ${env:SUPABASE_ANON_KEY, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjZXFseWlqYXRxbmdzYmd4Y2lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjM2MjIsImV4cCI6MjA3ODAzOTYyMn0.B5E041A0ieyEhPN7gMOPkMH_NOm9BtLhpUiTB85ijBE'}\n    SUPABASE_SERVICE_KEY: ${env:SUPABASE_SERVICE_KEY, 'your-service-key-here'}\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - secretsmanager:GetSecretValue\n          Resource:\n            - \"*\"\n\nfunctions:\n  api:\n    handler: lambda.handler\n    events:\n      - httpApi:\n          path: /{proxy+}\n          method: ANY\n\nplugins:\n  - serverless-offline\n\ncustom:\n  serverless-offline:\n    httpPort: 3001\n    lambdaPort: 3002\n\npackage:\n  patterns:\n    - 'node_modules/**'\n    - 'lambda.js'\n    - 'package.json'\n    - 'package-lock.json'\n",
+    "command": [
+      "deploy"
+    ],
+    "options": {},
+    "orgId": "6d18fb2e-fb81-48c9-986a-0192af06985b",
+    "orgName": "linernotesapp",
+    "userId": "Z8fhvk6xc6Zq9RJ7rq",
+    "userName": "linernotesapp",
+    "serviceProviderAwsAccountId": "590283425853",
+    "serviceProviderAwsCfStackName": "liner-notes-api-dev",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:590283425853:stack/liner-notes-api-dev/25ff1900-c64a-11f0-bb8e-12dc06ce78b7",
+    "serviceProviderAwsCfStackCreated": "2025-11-20T19:50:21.714Z",
+    "serviceProviderAwsCfStackUpdated": "2025-11-21T23:56:23.136Z",
+    "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "ApiLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:590283425853:function:liner-notes-api-dev-api:73",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-liner-notes-api-dev-ApiLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "HttpApiId",
+        "OutputValue": "rm0dtjuzqf",
+        "Description": "Id of the HTTP API",
+        "ExportName": "sls-liner-notes-api-dev-HttpApiId"
+      },
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "serverless-framework-deployments-us-east-1-705ce3db-0a9e",
+        "ExportName": "sls-liner-notes-api-dev-ServerlessDeploymentBucketName"
+      },
+      {
+        "OutputKey": "HttpApiUrl",
+        "OutputValue": "https://rm0dtjuzqf.execute-api.us-east-1.amazonaws.com",
+        "Description": "URL of the HTTP API",
+        "ExportName": "sls-liner-notes-api-dev-HttpApiUrl"
+      }
+    ],
+    "compiledCloudFormationTemplate": {
+      "AWSTemplateFormatVersion": "2010-09-09",
+      "Description": "The AWS CloudFormation template for this Serverless application",
+      "Resources": {
+        "ApiLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/liner-notes-api-dev-api"
+          }
+        },
+        "IamRoleLambdaExecution": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "lambda.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "liner-notes-api",
+                      "dev",
+                      "lambda"
+                    ]
+                  ]
+                },
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:CreateLogStream",
+                        "logs:CreateLogGroup",
+                        "logs:TagResource"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/liner-notes-api-dev*:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:PutLogEvents"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/liner-notes-api-dev*:*:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "secretsmanager:GetSecretValue"
+                      ],
+                      "Resource": [
+                        "*"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ],
+            "Path": "/",
+            "RoleName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "liner-notes-api",
+                  "dev",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "lambdaRole"
+                ]
+              ]
+            }
+          }
+        },
+        "ApiLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-705ce3db-0a9e",
+              "S3Key": "serverless/liner-notes-api/dev/1763769488116-2025-11-21T23:58:08.116Z/liner-notes-api.zip"
+            },
+            "Handler": "lambda.handler",
+            "Runtime": "nodejs20.x",
+            "FunctionName": "liner-notes-api-dev-api",
+            "MemorySize": 512,
+            "Timeout": 30,
+            "Environment": {
+              "Variables": {
+                "NODE_ENV": "production",
+                "SECRETS_ID": "<REDACTED>",
+                "SUPABASE_URL": "https://zceqlyijatqngsbgxcip.supabase.co",
+                "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjZXFseWlqYXRxbmdzYmd4Y2lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjM2MjIsImV4cCI6MjA3ODAzOTYyMn0.B5E041A0ieyEhPN7gMOPkMH_NOm9BtLhpUiTB85ijBE",
+                "SUPABASE_SERVICE_KEY": "your-service-key-here"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "ApiLogGroup"
+          ]
+        },
+        "ApiLambdaVersionD61X938tcr77Y9bfahZO0YnqPQ3dczc49v3nDZpfOw": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "ApiLambdaFunction"
+            },
+            "CodeSha256": "KR1rM9To6s0q2zOlFTT5Ye5kupk70gg9B6u5H4YF7no="
+          }
+        },
+        "HttpApi": {
+          "Type": "AWS::ApiGatewayV2::Api",
+          "Properties": {
+            "Name": "dev-liner-notes-api",
+            "ProtocolType": "HTTP",
+            "CorsConfiguration": {
+              "AllowHeaders": [
+                "*"
+              ],
+              "AllowMethods": [
+                "*"
+              ],
+              "AllowOrigins": [
+                "*"
+              ]
+            }
+          }
+        },
+        "HttpApiStage": {
+          "Type": "AWS::ApiGatewayV2::Stage",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "StageName": "$default",
+            "AutoDeploy": true,
+            "DefaultRouteSettings": {
+              "DetailedMetricsEnabled": false
+            }
+          }
+        },
+        "ApiLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "ApiLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationApi": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "ApiLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRouteAnyProxyVar": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "ANY /{proxy+}",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationApi"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationApi"
+        }
+      },
+      "Outputs": {
+        "ServerlessDeploymentBucketName": {
+          "Value": "serverless-framework-deployments-us-east-1-705ce3db-0a9e",
+          "Export": {
+            "Name": "sls-liner-notes-api-dev-ServerlessDeploymentBucketName"
+          }
+        },
+        "ApiLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "ApiLambdaVersionD61X938tcr77Y9bfahZO0YnqPQ3dczc49v3nDZpfOw"
+          },
+          "Export": {
+            "Name": "sls-liner-notes-api-dev-ApiLambdaFunctionQualifiedArn"
+          }
+        },
+        "HttpApiId": {
+          "Description": "Id of the HTTP API",
+          "Value": {
+            "Ref": "HttpApi"
+          },
+          "Export": {
+            "Name": "sls-liner-notes-api-dev-HttpApiId"
+          }
+        },
+        "HttpApiUrl": {
+          "Description": "URL of the HTTP API",
+          "Value": {
+            "Fn::Join": [
+              "",
+              [
+                "https://",
+                {
+                  "Ref": "HttpApi"
+                },
+                ".execute-api.",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ".",
+                {
+                  "Ref": "AWS::URLSuffix"
+                }
+              ]
+            ]
+          },
+          "Export": {
+            "Name": "sls-liner-notes-api-dev-HttpApiUrl"
+          }
+        }
+      }
+    }
+  }
+}

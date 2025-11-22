@@ -1,0 +1,56 @@
+service: liner-notes-api
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: dev
+  memorySize: 512
+  timeout: 30
+  httpApi:
+    cors:
+      allowedOrigins:
+        - "*"
+      allowedHeaders:
+        - "*"
+      allowedMethods:
+        - "*"
+  environment:
+    NODE_ENV: production
+    SECRETS_ID: ${env:SECRETS_ID, 'liner-notes-api-secrets'}
+    SUPABASE_URL: ${env:SUPABASE_URL, 'https://zceqlyijatqngsbgxcip.supabase.co'}
+    SUPABASE_ANON_KEY: ${env:SUPABASE_ANON_KEY, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjZXFseWlqYXRxbmdzYmd4Y2lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjM2MjIsImV4cCI6MjA3ODAzOTYyMn0.B5E041A0ieyEhPN7gMOPkMH_NOm9BtLhpUiTB85ijBE'}
+    SUPABASE_SERVICE_KEY: ${env:SUPABASE_SERVICE_KEY, 'your-service-key-here'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource:
+            - "*"
+
+functions:
+  api:
+    handler: lambda.handler
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3001
+    lambdaPort: 3002
+
+package:
+  patterns:
+    - 'node_modules/**'
+    - 'lambda.js'
+    - 'package.json'
+    - 'package-lock.json'

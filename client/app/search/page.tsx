@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { supabase } from '../lib/supabase';
 
 interface SearchResult {
   id: string;
@@ -32,49 +33,132 @@ function SearchPageContent() {
     setError(null);
     
     try {
-      // Mock data for now - replace with actual Discogs API call
-      const mockResults: SearchResult[] = [
-        {
-          id: '1',
-          title: 'Kind of Blue',
-          type: 'album',
-          artist: 'Miles Davis',
-          label: 'Columbia',
-          year: 1959,
-          image: '/placeholder-album.jpg'
-        },
-        {
-          id: '2',
-          title: 'Miles Davis',
-          type: 'artist',
-          image: '/placeholder-artist.jpg'
-        },
-        {
-          id: '3',
-          title: 'Blue Note Records',
-          type: 'label',
-          image: '/placeholder-label.jpg'
-        }
-      ];
+      // Call your real Lambda API
+      const response = await fetch(`https://rm0dtjuzqf.execute-api.us-east-1.amazonaws.com/dev/v1/search?q=${encodeURIComponent(searchQuery)}`);
+      const data = await response.json();
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setResults(mockResults);
+      // Transform API response to SearchResult format
+      const searchResults: SearchResult[] = [];
+      
+      // Add albums
+      if (data.albums) {
+        data.albums.forEach((album: any, index: number) => {
+          searchResults.push({
+            id: `album-${index}`,
+            title: album.title,
+            type: 'album',
+            artist: album.album_artists?.map((a: any) => a.artists.name).join(', ') || 'Unknown Artist',
+            label: album.labels?.name || 'Unknown Label',
+            year: album.release_year,
+            image: album.cover_image_url || '/placeholder-album.jpg'
+          });
+        });
+      }
+      
+      // Add artists
+      if (data.artists) {
+        data.artists.forEach((artist: any, index: number) => {
+          searchResults.push({
+            id: `artist-${index}`,
+            title: artist.name,
+            type: 'artist',
+            image: '/placeholder-artist.jpg'
+          });
+        });
+      }
+      
+      // Add labels
+      if (data.labels) {
+        data.labels.forEach((label: any, index: number) => {
+          searchResults.push({
+            id: `label-${index}`,
+            title: label.name,
+            type: 'label',
+            image: '/placeholder-label.jpg'
+          });
+        });
+      }
+      
+      setResults(searchResults);
     } catch (err) {
-      setError('Failed to search Discogs. Please try again.');
+      setError('Failed to search. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddToCollection = (item: SearchResult) => {
-    // TODO: Implement add to collection logic
-    alert(`Adding "${item.title}" to collection`);
+  const handleAddToCollection = async (item: SearchResult) => {
+    try {
+      // Check if user is logged in
+      const token = localStorage.getItem('supabase.auth.token');
+      if (!token) {
+        alert('Please sign in to add to collection');
+        window.location.href = '/collection';
+        return;
+      }
+
+      // Add to collection via API
+      const response = await fetch('https://rm0dtjuzqf.execute-api.us-east-1.amazonaws.com/dev/collections/albums', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: item.title,
+          artist: item.artist,
+          label: item.label,
+          year: item.year,
+          cover_image_url: item.image
+        })
+      });
+
+      if (response.ok) {
+        alert(`"${item.title}" added to collection!`);
+      } else {
+        const error = await response.json();
+        alert(`Failed to add: ${error.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      alert('Failed to add to collection. Please try again.');
+    }
   };
 
-  const handleAddToWishlist = (item: SearchResult) => {
-    // TODO: Implement add to wishlist logic
-    alert(`Adding "${item.title}" to wishlist`);
+  const handleAddToWishlist = async (item: SearchResult) => {
+    try {
+      // Check if user is logged in
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        alert('Please sign in to add to wishlist');
+        window.location.href = '/collection';
+        return;
+      }
+
+      // Add to wishlist via API
+      const response = await fetch('https://rm0dtjuzqf.execute-api.us-east-1.amazonaws.com/dev/wishlists/albums', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          title: item.title,
+          artist: item.artist,
+          label: item.label,
+          year: item.year,
+          cover_image_url: item.image
+        })
+      });
+
+      if (response.ok) {
+        alert(`"${item.title}" added to wishlist!`);
+      } else {
+        const error = await response.json();
+        alert(`Failed to add: ${error.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      alert('Failed to add to wishlist. Please try again.');
+    }
   };
 
   return (

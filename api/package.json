@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "offline": "serverless offline",
+    "deploy": "serverless deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -20,14 +22,17 @@
   "type": "commonjs",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "client-secrets-manager": "github:aws-sdk/client-secrets-manager",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "serverless-http": "^4.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "serverless-offline": "^14.4.0"
   }
 }
